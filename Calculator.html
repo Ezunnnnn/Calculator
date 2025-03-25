@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation Table</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: center; }
+        input { width: 100px; }
+        textarea { width: 100%; height: 100px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Calculation Table</h2>
+    
+    <label>RT: <input type="number" id="rt" oninput="calculateAll()"></label>
+    <button onclick="addRow()">Add Row</button>
+    <button onclick="deleteRow()">Delete Row</button>
+
+    <table>
+        <tr>
+            <th>Extra Info</th>
+            <th>RMB</th>
+            <th>Fee (% or Fixed)</th>
+            <th>RMB + Fee</th>
+            <th>RM</th>
+        </tr>
+        <tbody id="tableBody"></tbody>
+    </table>
+    
+    <button onclick="calculateAll()">Calculate</button>
+    <button onclick="generate()">Generate</button>
+    <textarea id="output" readonly></textarea>
+
+    <script>
+        function addRow() {
+            let tableBody = document.getElementById("tableBody");
+            let row = document.createElement("tr");
+            row.innerHTML = `<td><input type="text" class="extraInfo"></td>
+                             <td><input type="number" class="rmb" oninput="clearRM(this)"></td>
+                             <td><input type="text" class="fee"></td>
+                             <td class="rmbFee">-</td>
+                             <td><input type="number" class="rm" oninput="clearRMB(this)"></td>`;
+            tableBody.appendChild(row);
+        }
+
+        function deleteRow() {
+            let tableBody = document.getElementById("tableBody");
+            if (tableBody.children.length > 0) {
+                tableBody.removeChild(tableBody.lastChild);
+            }
+        }
+
+        function calculateAll() {
+            let rows = document.querySelectorAll("#tableBody tr");
+            let rt = parseFloat(document.getElementById("rt").value) || 0;
+
+            rows.forEach(row => {
+                let rmbField = row.querySelector(".rmb");
+                let feeField = row.querySelector(".fee");
+                let rmbFeeCell = row.querySelector(".rmbFee");
+                let rmField = row.querySelector(".rm");
+
+                let rmb = parseFloat(rmbField.value) || 0;
+                let rm = parseFloat(rmField.value) || 0;
+                let feeInput = feeField.value.trim();
+                let fee = 0;
+
+                if (feeInput.includes("%")) {
+                    fee = (parseFloat(feeInput) / 100) * rmb;
+                } else {
+                    fee = parseFloat(feeInput) || 0;
+                }
+
+                let rmbFee = rmb + fee;
+
+                if (rm > 0) {
+                    rmbFee = rm * rt;
+                    rmbField.value = (rmbFee - fee).toFixed(2);
+                }
+
+                rmbFeeCell.innerText = rmbFee.toFixed(2);
+                rmField.value = (rmbFee / rt).toFixed(2);
+            });
+        }
+
+        function clearRM(input) {
+            input.closest("tr").querySelector(".rm").value = "";
+        }
+
+        function clearRMB(input) {
+            input.closest("tr").querySelector(".rmb").value = "";
+        }
+
+        function generate() {
+            let rows = document.querySelectorAll("#tableBody tr");
+            let output = "";
+            let totalRM = 0;
+
+            rows.forEach(row => {
+                let extraInfo = row.querySelector(".extraInfo").value;
+                let rmb = parseFloat(row.querySelector(".rmb").value) || 0;
+                let feeInput = row.querySelector(".fee").value.trim();
+                let fee = feeInput.includes("%") ? (parseFloat(feeInput) / 100) * rmb : parseFloat(feeInput) || 0;
+                let rmbFee = rmb + fee;
+                let rm = parseFloat(row.querySelector(".rm").value) || 0;
+                let rt = parseFloat(document.getElementById("rt").value) || 0;
+
+                output += ${extraInfo}\nRMB${rmb.toFixed(2)} + RMB${fee.toFixed(2)} = RMB${rmbFee.toFixed(2)} / ${rt} = RM ${rm.toFixed(2)}\n\n;
+                totalRM += rm;
+            });
+
+            output += Total = RM ${totalRM.toFixed(2)};
+            document.getElementById("output").value = output;
+        }
+
+        addRow();
+    </script>
+</body>
+</html>

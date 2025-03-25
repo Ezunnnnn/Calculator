@@ -107,11 +107,11 @@
                 let rm = parseFloat(row.querySelector(".rm").value) || 0;
                 let rt = parseFloat(document.getElementById("rt").value) || 0;
 
-                output += ${extraInfo}\nRMB${rmb.toFixed(2)} + RMB${fee.toFixed(2)} = RMB${rmbFee.toFixed(2)} / ${rt} = RM ${rm.toFixed(2)}\n\n;
+                output += `\n${extraInfo}\nRMB${rmb.toFixed(2)} + RMB${fee.toFixed(2)} = RMB${rmbFee.toFixed(2)} / ${rt} = RM ${rm.toFixed(2)}\n\n`;
                 totalRM += rm;
             });
 
-            output += Total = RM ${totalRM.toFixed(2)};
+            output += `Total = RM ${totalRM.toFixed(2)}`;
             document.getElementById("output").value = output;
         }
 
